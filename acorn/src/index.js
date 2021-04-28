@@ -15,12 +15,12 @@
 // [walk]: util/walk.js
 
 import {Parser} from "./state.js"
-import "./parseutil.js"
-import "./statement.js"
-import "./lval.js"
-import "./expression.js"
-import "./location.js"
-import "./scope.js"
+// import "./parseutil.js"
+// import "./statement.js"
+// import "./lval.js"
+// import "./expression.js"
+// import "./location.js"
+// import "./scope.js"
 
 import {defaultOptions} from "./options.js"
 import {Position, SourceLocation, getLineInfo} from "./locutil.js"

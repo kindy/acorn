@@ -1,8 +1,8 @@
+// @ts-check
 // The algorithm used to determine whether a regexp can appear at a
 // given point in the program is loosely based on sweet.js' approach.
 // See https://github.com/mozilla/sweet.js/wiki/design
 
-import {Parser} from "./state.js"
 import {types as tt} from "./tokentype.js"
 import {lineBreak} from "./whitespace.js"
 
@@ -27,52 +27,6 @@ export const types = {
   f_expr: new TokContext("function", true),
   f_expr_gen: new TokContext("function", true, false, null, true),
   f_gen: new TokContext("function", false, false, null, true)
-}
-
-const pp = Parser.prototype
-
-pp.initialContext = function() {
-  return [types.b_stat]
-}
-
-pp.braceIsBlock = function(prevType) {
-  let parent = this.curContext()
-  if (parent === types.f_expr || parent === types.f_stat)
-    return true
-  if (prevType === tt.colon && (parent === types.b_stat || parent === types.b_expr))
-    return !parent.isExpr
-
-  // The check for `tt.name && exprAllowed` detects whether we are
-  // after a `yield` or `of` construct. See the `updateContext` for
-  // `tt.name`.
-  if (prevType === tt._return || prevType === tt.name && this.exprAllowed)
-    return lineBreak.test(this.input.slice(this.lastTokEnd, this.start))
-  if (prevType === tt._else || prevType === tt.semi || prevType === tt.eof || prevType === tt.parenR || prevType === tt.arrow)
-    return true
-  if (prevType === tt.braceL)
-    return parent === types.b_stat
-  if (prevType === tt._var || prevType === tt._const || prevType === tt.name)
-    return false
-  return !this.exprAllowed
-}
-
-pp.inGeneratorContext = function() {
-  for (let i = this.context.length - 1; i >= 1; i--) {
-    let context = this.context[i]
-    if (context.token === "function")
-      return context.generator
-  }
-  return false
-}
-
-pp.updateContext = function(prevType) {
-  let update, type = this.type
-  if (type.keyword && prevType === tt.dot)
-    this.exprAllowed = false
-  else if (update = type.updateContext)
-    update.call(this, prevType)
-  else
-    this.exprAllowed = type.beforeExpr
 }
 
 // Token-specific context update code
